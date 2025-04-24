@@ -1,8 +1,6 @@
 package com.plathanus.auth.util;
 
 import com.plathanus.auth.security.JwtUtil;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
@@ -54,7 +52,7 @@ class JwtUtilTest {
 
         String fakeToken = "invalid.token.bluhbluhbluh";
         System.out.println("[TEST] Using invalid token: " + fakeToken);
-        assertThrows(JwtException.class, () -> jwtUtil.isTokenValid(fakeToken, user));
+        assertFalse(jwtUtil.isTokenValid(fakeToken, user));
     }
 
     @Test
@@ -66,9 +64,9 @@ class JwtUtilTest {
         String token = jwtUtil.generateToken(user);
         System.out.println("[TEST] Generated token (will expire quickly): " + token);
 
-        Thread.sleep(50); // deixa expirar
+        Thread.sleep(50); // 50ms
 
-        assertThrows(ExpiredJwtException.class, () -> jwtUtil.isTokenValid(token, user));
+        assertFalse(jwtUtil.isTokenValid(token, user));
     }
 
 }
