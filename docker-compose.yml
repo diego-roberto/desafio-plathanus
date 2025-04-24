@@ -1,0 +1,49 @@
+networks:
+  app-network:
+    driver: bridge
+
+services:
+
+  # Databases #
+
+  postgres-auth:
+    image: postgres:15
+    container_name: postgres-auth
+    environment:
+      POSTGRES_DB: ${DB_AUTH_NAME}
+      POSTGRES_USER: ${DB_AUTH_USER}
+      POSTGRES_PASSWORD: ${DB_AUTH_PASS}
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+      - auth-data:/var/lib/postgresql/data
+    ports:
+      - "${DB_AUTH_PORT}:5432"
+    networks:
+      - app-network
+    restart: always
+
+  # Services #
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: docker/Dockerfile
+    container_name: auth-service
+    depends_on:
+      - postgres-auth
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-auth:5432/${DB_AUTH_NAME}"
+      SPRING_DATASOURCE_USERNAME: ${DB_AUTH_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_AUTH_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      AES_SECRET: ${AES_SECRET}
+    networks:
+    - app-network
+    ports:
+      - "8081:8080"
+
+volumes:
+  auth-data:
