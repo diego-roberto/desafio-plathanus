@@ -22,6 +22,22 @@ services:
       - app-network
     restart: always
 
+  postgres-sales:
+    image: postgres:15
+    container_name: postgres-sales
+    environment:
+      POSTGRES_DB: ${DB_SALES_NAME}
+      POSTGRES_USER: ${DB_SALES_USER}
+      POSTGRES_PASSWORD: ${DB_SALES_PASS}
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+      - sales-data:/var/lib/postgresql/data
+    ports:
+      - "${DB_SALES_PORT}:5432"
+    networks:
+      - app-network
+    restart: always
+
   # Services #
 
   auth-service:
@@ -45,5 +61,23 @@ services:
     ports:
       - "8081:8080"
 
+  sales-service:
+    build:
+      context: ./sales-service
+      dockerfile: docker/Dockerfile
+    container_name: sales-service
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-auth:5432/${DB_SALES_NAME}"
+      SPRING_DATASOURCE_USERNAME: ${DB_SALES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_SALES_PASS}
+    depends_on:
+      - postgres-sales
+      - auth-service
+    networks:
+    - app-network
+    ports:
+      - "8082:8080"
+
 volumes:
   auth-data:
+  sales-data:
