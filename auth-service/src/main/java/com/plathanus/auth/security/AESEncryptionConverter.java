@@ -1,7 +1,9 @@
 package com.plathanus.auth.security;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -17,11 +19,15 @@ public class AESEncryptionConverter implements AttributeConverter<String, String
     private static final int GCM_IV_LENGTH = 12;
     private static final int GCM_TAG_LENGTH = 16;
 
-    private static SecretKey secretKey;
     private static final SecureRandom secureRandom = new SecureRandom();
+    private static SecretKey secretKey;
 
-    public AESEncryptionConverter(SecretKey key) {
-        AESEncryptionConverter.secretKey = key;
+    @Autowired
+    private SecretKey injectedSecretKey;
+
+    @PostConstruct
+    public void init() {
+        secretKey = injectedSecretKey;
     }
 
     @Override
@@ -29,19 +35,16 @@ public class AESEncryptionConverter implements AttributeConverter<String, String
         try {
             byte[] iv = new byte[GCM_IV_LENGTH];
             secureRandom.nextBytes(iv);
-
             Cipher cipher = Cipher.getInstance(ENCRYPT_ALGO);
-            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv));
 
             byte[] encrypted = cipher.doFinal(attribute.getBytes());
-            ByteBuffer byteBuffer = ByteBuffer.allocate(iv.length + encrypted.length);
-            byteBuffer.put(iv);
-            byteBuffer.put(encrypted);
-            return Base64.getEncoder().encodeToString(byteBuffer.array());
-
+            ByteBuffer buffer = ByteBuffer.allocate(iv.length + encrypted.length);
+            buffer.put(iv);
+            buffer.put(encrypted);
+            return Base64.getEncoder().encodeToString(buffer.array());
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to encrypt attribute", e);
+            throw new IllegalStateException("Encryption failed", e);
         }
     }
 
@@ -56,13 +59,12 @@ public class AESEncryptionConverter implements AttributeConverter<String, String
             buffer.get(encrypted);
 
             Cipher cipher = Cipher.getInstance(ENCRYPT_ALGO);
-            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv));
+            byte[] decrypted = cipher.doFinal(encrypted);
 
-            return new String(cipher.doFinal(encrypted));
-
+            return new String(decrypted);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to decrypt attribute", e);
+            throw new IllegalStateException("Decryption failed", e);
         }
     }
 

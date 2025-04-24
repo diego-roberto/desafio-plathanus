@@ -15,7 +15,19 @@ public class EncryptionKeyConfig {
 
     @Bean
     public SecretKey aesSecretKey() {
-        return new SecretKeySpec(secret.getBytes(), "AES");
+        byte[] keyBytes = hexToBytes(secret);
+        return new SecretKeySpec(keyBytes, "AES");
+    }
+
+    private byte[] hexToBytes(String hex) {
+        int len = hex.length();
+        if (len % 2 != 0) throw new IllegalArgumentException("Hex string must have even length");
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            bytes[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                    + Character.digit(hex.charAt(i + 1), 16));
+        }
+        return bytes;
     }
 
 }
