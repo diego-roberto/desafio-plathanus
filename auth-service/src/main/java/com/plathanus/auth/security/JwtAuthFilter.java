@@ -37,7 +37,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String token = authHeader.substring(7).trim();
 
         try {
-            final String username = jwtUtil.extractUsername(token); // 🔥 deve estar DENTRO do try
+            final String username = jwtUtil.extractUsername(token);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 

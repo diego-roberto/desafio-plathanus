@@ -24,8 +24,11 @@ public class User {
     @Convert(converter = AESEncryptionConverter.class)
     private String cpf;
 
+    @Convert(converter = AESEncryptionConverter.class)
     private String name;
+
     private String username;
+
     private String password;
 
     @Enumerated(EnumType.STRING)
