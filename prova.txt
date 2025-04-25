@@ -1,0 +1,81 @@
+
+Prova Plathanus
+
+Concessionária de automóveis
+
+Uma concessionária de automóveis precisa contratar os serviços de um desenvolvedor Java para resolver seu problema. A mesma não possui um gerenciamento de estoque/vendas entre as
+vendas físicas (pessoalmente nas lojas) e online, e precisa automatizar isso num sistema.
+
+Os requisitos funcionais necessários para que o sistema atenda as necessidades são listadas a seguir:
+
+•  O sistema deve ter uma tela de login, onde valida login e senha antes de entrar no sistema.
+
+•  O sistema deve ter usuários.
+- Não é necessário ter tela de cadastro de usuário. Podem ser usuários (com login e senha) já cadastrados diretamente no banco de dados.
+- Um usuário deve conter os seguintes dados: cpf, nome, login, senha e perfil de acesso. Um usuário pode ser um cliente ou um vendedor.
+- Um vendedor deve conter os seguintes dados: id e nome.
+
+•  O sistema deve conter 2 perfis de acesso: VENDEDOR e CLIENTE.
+- O perfil VENDEDOR pode fazer uma venda física.
+- O perfil CLIENTE pode fazer uma compra (representado por uma venda no sistema*) online.
+- O usuário deve estar relacionado a um perfil de acesso. A partir do perfil (VENDEDOR ou CLIENTE), o sistema vai permitir uma venda online ou física.
+- O perfil VENDEDOR vai ter acesso na tela de listagem dos veículos (tela principal) a um botão para listar os usuários que estão cadastrados no banco de dados.
+*O cliente faz uma compra e o vendedor faz uma venda. Ambos são representados como uma venda pelo sistema.
+
+•  O sistema deve conter veículos.
+- Não precisa ter tela de cadastro de veículos. Podem ser veículos já cadastrados diretamente no banco de dados.
+- O veículo precisa ter os seguintes dados: ano, preço, cor (branca, prata (1% a mais no preço base) e preta (2% a mais no preço base)) e modelo.
+- O cálculo do preço é feita da seguinte forma:
+- Para vendas de veículos para pessoa jurídica considerar preço base + variação do preço da cor (se for prata ou preta) com 20% de desconto.
+- Para vendas de veículos para pessoa física PCD considerar preço base + variação do preço da cor (se for prata ou preta) com 30% de desconto.
+- Para vendas de veículos para pessoa física é preço base + variação do preço da cor (se for prata ou preta).
+
+•  O sistema deve permitir realizar compras (por parte dos clientes) e vendas (por parte dos vendedores):
+- Uma venda deve conter os seguintes dados: id, tipo venda (online ou física), cliente que comprou o veículo
+e vendedor (se for venda física, o vendedor passa a ser obrigatório informar).
+
+•  O sistema deve permitir colocar veículos no carrinho (antes de uma compra por parte dos clientes ou uma venda por um vendedor).
+- Um carrinho precisa ter os seguintes dados: veículo, cliente e tempo de validade do carrinho (o veículo no carrinho deve ficar no máximo 1 minuto, passando esse tempo,
+o veículo deve voltar a ficar disponível para outros usuários e quando clicar para finalizar compra/venda, deve apresentar erro que o veículo não está mais disponível no carrinho).
+- Ao clicar para comprar/vender quando o carrinho ainda estiver no tempo de validade (menos de 1 minuto), o sistema efetua a venda no banco de dados e o veículo não fica mais
+listado como veículo disponível.
+- Não deve ser possível realizar uma compra/venda sem antes colocar o veículo no carrinho.
+
+•  O sistema deve controlar estoque.
+- Ao colocar um veículo no carrinho, precisa tirar de disponibilidade.
+- Ao sair da tela de carrinho ou desistir da compra, precisa voltar a ter disponibilidade.
+- O vendedor ao realizar uma venda física, o sistema deve efetivar a venda e tirar a disponibilidade.
+- O cliente ao realizar uma compra online, o sistema deve efetivar a venda e tirar a disponibilidade.
+- O sistema deve permitir logar em dois navegadores com usuários diferentes, para ver o controle de estoque/carrinho funcionando.
+
+•  O sistema deve listar os veículos disponíveis a venda na tela principal (após a realização do login).
+- O sistema deve permitir que o cliente clique em qualquer veículo disponível da listagem. Ao clicar em algum veículo da listagem, uma tela de detalhamento do veículo deve ser
+apresentada. Os dados do veículo que precisam ser apresentados: ano, preço, cor (branca, prata e preta) e modelo.
+- A tela de detalhamento do veículo deve conter um botão para adicionar no carrinho e outro para voltar para tela principal (que contém a listagem dos veículos). Após o clique
+para adicionar no carrinho. A tela de carrinho deve ser apresentada.
+
+•  O sistema deve conter a tela de carrinho onde será apresentada após o clique na tela de detalhamento do veículo.
+- Nessa tela terão dois botões: "Cancelar" e "Efetivar compra" (para perfil cliente) / "Efetivar venda" (para perfil vendedor).
+- Ao clicar em Cancelar, o sistema deve retornar a tela de detalhamento do veículo.
+- Ao clicar para Efetivar compra/Efetivar venda, o sistema deve salvar a venda e dar baixa no estoque (tornar o veículo indisponível de forma efetiva).
+
+•  O sistema deve ter um botão na tela principal (que contém a listagem dos veículos) que listará os usuários cadastrados no banco de dados em uma tela secundária. Apenas usuários
+com o perfil VENDEDOR tem acesso a esse botão e listagem dos usuários.
+- A tela de listagem dos usuários deve apresentar de forma tabular os dados: cpf, nome, login e perfil de acesso (todos texto plano, ou seja, sem criptografia na tela).
+- A tela de listagem dos usuários deve ter um botão voltar, que retorna para a tela principal.
+
+
+Os requisitos não funcionais necessários para que o sistema atenda as necessidades são listadas a seguir:
+
+•  Nenhuma tela do sistema deve permitir ser acessada sem login prévio.
+•  O sistema deve salvar e ler as informações/dados em um banco de dados que respeite as propriedades ACID.
+•  A tabela do banco de dados de usuários precisa ter os dados armazenados criptografados por conter dados sensíveis. Os campos necessários para criptografia são:
+cpf, nome, login e senha.
+•  O sistema deve ter frontend e os serviços backend. Deve conter no mínimo 2 microsserviços/serviços de backend para resolver o problema. Os acessos aos serviços precisam ser APIs.
+•  A implementação deve ser realizada com Java e Spring Boot.
+•  Os serviços de backend (APIs) precisam ter camada de segurança. Como são APIs expostas na internet (hipoteticamente), precisamos garantir que ninguém acesse os dados (GET) ou
+insira/altere dados (POST, PUT, DELETE) sem permissão.
+
+
+Sobre a avaliação:
+•  Será avaliado se o sistema/código entregue pelo candidato cumpriu os requisitos listados, seguindo uma qualidade de código, e se as boas práticas de programação e arquiteturas foram atendidas.
