@@ -1,5 +1,6 @@
 package com.plathanus.auth.security;
 
+import com.plathanus.auth.config.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -32,6 +34,12 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public UUID extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        String id = claims.get("userId", String.class);
+        return UUID.fromString(id);
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -45,25 +53,18 @@ public class JwtUtil {
                 .getBody();
     }
 
-//    public String generateToken(UserDetails userDetails) {
-//        return Jwts.builder()
-//                .setSubject(userDetails.getUsername())
-//                .claim("roles", userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-//                .signWith(getSignKey(), SignatureAlgorithm.HS256)
-//                .compact();
-//    }
-
     public String generateToken(UserDetails userDetails) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
                 .toList();
 
+        UUID userId = userDetails instanceof CustomUserDetails c ? c.getId() : null;
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("roles", roles)
+                .claim("userId", userId != null ? userId.toString() : "")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)

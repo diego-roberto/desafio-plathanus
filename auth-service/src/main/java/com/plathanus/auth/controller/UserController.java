@@ -10,12 +10,11 @@ import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -50,5 +49,30 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id) {
+        String token = authHeader.replace("Bearer ", "");
+        if (!jwtUtil.isTokenValid(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            List<String> roles = claims.get("roles", List.class);
+
+            if (roles != null && roles.contains("ROLE_VENDOR")) {
+                Optional<User> user =  userRepository.findById(id);
+                return user.map(value -> ResponseEntity.ok(userMapper.toUserDTO(value))).orElseGet(() -> ResponseEntity.noContent().build());
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+        } catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+    }
+
 
 }

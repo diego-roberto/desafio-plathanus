@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -37,9 +38,10 @@ public class AuthController {
             }
 
             String username = jwtUtil.extractUsername(token);
+            UUID uuid = jwtUtil.extractUserId(token);
             List<String> roles = jwtUtil.extractClaim(token, claims -> claims.get("roles", List.class));
 
-            return ResponseEntity.ok(new TokenPayloadDTO(username, roles));
+            return ResponseEntity.ok(new TokenPayloadDTO(uuid, username, roles));
         } catch (JwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

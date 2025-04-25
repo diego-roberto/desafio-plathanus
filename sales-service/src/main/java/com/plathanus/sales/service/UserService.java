@@ -1,6 +1,7 @@
 package com.plathanus.sales.service;
 
 import com.plathanus.sales.config.AuthServiceProperties;
+import com.plathanus.sales.dto.TokenPayloadDTO;
 import com.plathanus.sales.dto.UserDTO;
 import com.plathanus.sales.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +61,40 @@ public class UserService {
                 userDTOList.size()
         );
 
+    }
+
+    public Optional<UserDTO> findUserById(UUID id, String token) {
+        String url = properties.getUrl() + "/users/" + id;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<UserDTO> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, UserDTO.class
+        );
+
+        return Optional.ofNullable(response.getBody());
+
+    }
+
+    public TokenPayloadDTO getTokenPayload(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<TokenPayloadDTO> response = restTemplate.exchange(
+                properties.getUrl() + "/auth/validate",
+                HttpMethod.GET,
+                entity,
+                TokenPayloadDTO.class
+        );
+
+        TokenPayloadDTO payload = response.getBody();
+        if (payload == null || payload.id() == null) {
+            throw new IllegalStateException("Falha ao validar token ou identificar usuário");
+        }
+        return payload;
     }
 
 }
