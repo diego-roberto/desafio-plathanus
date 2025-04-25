@@ -12,6 +12,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,6 +20,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpClientErrorException.Forbidden.class)
     public ResponseEntity<String> handleForbidden(HttpClientErrorException.Forbidden ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado: perfil não autorizado para esta ação.");
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<String> handleNoSuchElement(NoSuchElementException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
     @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
@@ -61,7 +72,6 @@ public class GlobalExceptionHandler {
         }
         return ResponseEntity.internalServerError().body("Erro inesperado: " + ex.getMessage());
     }
-
 
 }
 

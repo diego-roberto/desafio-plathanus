@@ -1,10 +1,10 @@
 package com.plathanus.sales.service;
 
-import com.plathanus.sales.config.AuthServiceProperties;
 import com.plathanus.sales.dto.TokenPayloadDTO;
 import com.plathanus.sales.dto.UserDTO;
 import com.plathanus.sales.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,10 +25,12 @@ import java.util.UUID;
 public class UserService {
 
     private final RestTemplate restTemplate;
-    private final AuthServiceProperties properties;
+
+    @Value("${auth.service.url}")
+    private String auth_url;
 
     public Page<UserDTO> findAll(Pageable pageable) {
-        String url = properties.getUrl() + "/users";
+        String url = auth_url + "/users";
 
         HttpHeaders headers = new HttpHeaders();
         String token = TokenUtil.getCurrentRequestToken();
@@ -64,7 +66,7 @@ public class UserService {
     }
 
     public Optional<UserDTO> findUserById(UUID id, String token) {
-        String url = properties.getUrl() + "/users/" + id;
+        String url = auth_url + "/users/" + id;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -84,7 +86,7 @@ public class UserService {
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         ResponseEntity<TokenPayloadDTO> response = restTemplate.exchange(
-                properties.getUrl() + "/auth/validate",
+                auth_url + "/auth/validate",
                 HttpMethod.GET,
                 entity,
                 TokenPayloadDTO.class
