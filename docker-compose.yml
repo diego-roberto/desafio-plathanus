@@ -67,9 +67,10 @@ services:
       dockerfile: docker/Dockerfile
     container_name: sales-service
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-auth:5432/${DB_SALES_NAME}"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-sales:5432/${DB_SALES_NAME}"
       SPRING_DATASOURCE_USERNAME: ${DB_SALES_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_SALES_PASS}
+      AUTH_SERVICE_URL: http://auth-service:8080
     depends_on:
       - postgres-sales
       - auth-service

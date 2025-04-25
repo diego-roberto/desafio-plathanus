@@ -58,16 +58,8 @@ public class UserController {
         }
 
         try {
-            Claims claims = jwtUtil.extractAllClaims(token);
-            List<String> roles = claims.get("roles", List.class);
-
-            if (roles != null && roles.contains("ROLE_VENDOR")) {
-                Optional<User> user =  userRepository.findById(id);
-                return user.map(value -> ResponseEntity.ok(userMapper.toUserDTO(value))).orElseGet(() -> ResponseEntity.noContent().build());
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            }
-
+            Optional<User> user = userRepository.findById(id);
+            return user.map(value -> ResponseEntity.ok(userMapper.toUserDTO(value))).orElseGet(() -> ResponseEntity.noContent().build());
         } catch (JwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
