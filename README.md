@@ -25,7 +25,6 @@ A partir da pasta raiz do projeto, onde se encontra o arquivo docker-compose.yml
 
 </br>
 
-🚧 trabalhando no frontend...
 
 ## REQUISITOS / FUNCIONALIDADES IMPLEMENTADAS 
 ### Autenticação
